@@ -1,15 +1,16 @@
-from pynput.mouse import Listener
+from pynput.mouse import Listener, Button, Controller
 import pyautogui, threading, keyboard, time, os
 
-threads = 15
+threads = 8
 hold = True # Wether or not you have to hold down the click button to autoclick
 toggle_key = "f3"
 
-class Main(Listener):
+class Main(Controller):
     def __init__(self):
         self.down = False
         self.toggle = True
         self.on = False
+        self.mouse = super()
         self.clicks = 0
         self.count = 0
         for _ in range(threads):
@@ -29,7 +30,8 @@ class Main(Listener):
 
     def click(self):
         self.clicks += 1
-        pyautogui.click()
+        self.mouse.press(Button.left)
+        self.mouse.release(Button.left)
 
     def spam(self):
         while True:
@@ -52,15 +54,18 @@ class Main(Listener):
 
             time.sleep(1)
 
-    def on_click(self, *args):
+    def on_click(self, x, y, button, pressed):
+        if not button == Button.left:
+            return
+            
         if self.clicks: 
-            if not args[-1]: 
+            if not pressed: 
                 self.clicks -= 1
             return
 
         if hold:
-            self.down = args[-1]
-        elif args[-1]:
+            self.down = pressed
+        elif pressed:
             self.down = not self.down
 
 if __name__ == "__main__":
